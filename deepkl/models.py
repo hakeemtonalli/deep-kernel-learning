@@ -20,7 +20,8 @@ class SpectralMixtureGPModel(gpytorch.models.ExactGP):
         super(SpectralMixtureGPModel, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = gpytorch.kernels.SpectralMixtureKernel(num_mixtures=num_mixtures)
-        self.covar_module.initialize_from_data(train_x, train_y)
+        #self.covar_module.initialize_from_data(train_x, train_y)
+        self.covar_module.initialize_from_data_empspect(train_x, train_y)
 
     def forward(self, x):
         mean_x = self.mean_module(x)
