@@ -1,0 +1,6 @@
+notebooks/**
+.vscode/**
+*/.ipynb_checkpoints/**
+**/.DS_Store
+**.ipynb
+*.csv

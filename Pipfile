@@ -1,0 +1,28 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+numpy = "*"
+pandas = "*"
+scikit-learn = "*"
+seaborn = "*"
+matplotlib = "*"
+ipykernel = "*"
+jupyter = "*"
+jupyterlab = "*"
+pyodbc = "*"
+psycopg2-binary = "*"
+tqdm = "*"
+pyyaml = "*"
+torchvision = "*"
+pyro-ppl = "*"
+gpytorch = "*"
+pytorch-lightning = "*"
+
+[requires]
+python_version = "3.8"
