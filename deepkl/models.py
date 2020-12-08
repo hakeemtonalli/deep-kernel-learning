@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import gpytorch
-
+import numpy as np
 class SpectralMixtureGPModel(gpytorch.models.ExactGP):
     """
     Gaussian process model with Spectral Mixture Kernel from Wilson et al. (2013).
@@ -30,11 +30,11 @@ class SpectralMixtureGPModel(gpytorch.models.ExactGP):
     
     
 class GRUFeatureExtractor(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes):
+    def __init__(self, input_dim, hidden_dim, num_layers):
         super(GRUFeatureExtractor, self).__init__()
-        self.hidden_size = hidden_size 
+        self.hidden_dim = hidden_dim
         self.num_layers = num_layers
-        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
+        self.gru = nn.GRU(input_dim, hidden_dim, num_layers)
         
     def forward(self, x):
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
@@ -43,15 +43,32 @@ class GRUFeatureExtractor(nn.Module):
         return out
         
 class LSTMFeatureExtractor(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes):
+    def __init__(self, input_dim, hidden_dim, num_layers):
         super(LSTMFeatureExtractor, self).__init__()
-        self.hidden_size = hidden_size 
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
         self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, bidirectional=False)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, bidirectional=False)
     
     def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+        h0 = torch.zeros(self.num_layers, x.size(1), self.hidden_dim)
+        c0 = torch.zeros(self.num_layers, x.size(1), self.hidden_dim)
         out, _ = self.lstm(x, (h0, c0))
         out = out.reshape(out.shape[0], -1)
         return out
+    
+if __name__ == '__main__':
+    # generate univariate data
+    y = np.random.normal(0, 1, 120)
+    
+    # convert to Tensor and reshape
+    y = torch.Tensor(torch.from_numpy(y).float())
+    y = y.view([len(y), -1, 1])
+    
+    # test forward method
+    model = LSTMFeatureExtractor(input_dim=1, hidden_dim=16, num_layers=2)
+    yhat = model(y)
+    print(yhat)
+
+    
+    
