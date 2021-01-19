@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import gpytorch
 import numpy as np
+
 class SpectralMixtureGPModel(gpytorch.models.ExactGP):
     """
     Gaussian process model with Spectral Mixture Kernel from Wilson et al. (2013).
@@ -57,16 +58,35 @@ class LSTMFeatureExtractor(nn.Module):
         out = out.reshape(out.shape[0], -1)
         return out
     
+def create_sequences(x, sequence_length):
+    """
+    Creates a transformed dataset for the LSTM with a new sequence length.
+    """
+    x_seq, y_seq = [], []
+    for i in range(len(x) -sequence_length):
+        x_seq.append(x[i: i + sequence_length])
+        y_seq.append(x[i+1: i + sequence_length + 1])
+    x_seq = np.array(x_seq).reshape(-1, sequence_length)
+    y_seq = np.array(y_seq).reshape(-1, sequence_length)
+    return x_seq, y_seq
+    
 if __name__ == '__main__':
     # generate univariate data
     y = np.random.normal(0, 1, 120)
+    sequence_length = 5
     
-    # convert to Tensor and reshape
-    y = torch.Tensor(torch.from_numpy(y).float())
-    y = y.view([len(y), -1, 1])
+    test_x, test_y = create_sequences(y, sequence_length=5)
+    print(test_x)
+    print(test_y.shape)
+    
+    
+    # convert to Tensor and reshape to (seq, batch, dim)
+    y = torch.Tensor(torch.from_numpy(test_y).float())
+    y = y.view([len(y), -1, 5])
+    print(y.size())
     
     # test forward method
-    model = LSTMFeatureExtractor(input_dim=1, hidden_dim=16, num_layers=2)
+    model = LSTMFeatureExtractor(input_dim=5, hidden_dim=16, num_layers=2)
     yhat = model(y)
     print(yhat)
 
